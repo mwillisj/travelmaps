@@ -1,0 +1,270 @@
+---
+title: "wallart_maps"
+author: "Megan Willis-Jackson"
+date: "6/8/2022"
+output: html_document
+---
+
+
+# Load Libraries
+
+```{r, message=F, warning=F}
+library(osmdata)
+library(tidyverse)
+library(sf)
+library(ggthemes)
+library(ggspatial)
+library(here)
+
+```
+
+# Load City Streets
+
+
+## Paris
+```{r}
+paris_street_features <- opq(bbox = 'Paris France') %>%
+  add_osm_feature(key = 'highway') %>%
+  osmdata_sf()
+
+paris_streets <- paris_street_features$osm_lines
+
+```
+
+```{r}
+left_side <- st_bbox(paris_streets)$xmin + .03
+right_side <- st_bbox(paris_streets)$xmax - .06
+bottom_side <- st_bbox(paris_streets)$ymin
+top_side <- st_bbox(paris_streets)$ymax
+
+
+paris_streets <- paris_streets %>%
+  st_crop(c(xmin = 2.24, xmax = 2.42,
+          ymin = 48.8, ymax = 48.9))
+
+ggplot(paris_streets) +
+  geom_sf(alpha = .8, size = .2) +
+  coord_sf(xlim = c(left_side, right_side),
+           ylim = c(bottom_side, top_side)) +
+  theme_map() +
+  theme(panel.background = element_rect(fill = "wheat", color = NA))
+
+ggsave("C:/Users/mwill/OneDrive - Harvard University/Personal Projects/WallArt/photos/paris.jpeg",
+       height = 7, width = 7)
+
+
+```
+
+
+## Amsterdam
+```{r}
+amsterdam_street_features <- opq(bbox = 'Amsterdam Netherlands') %>%
+  add_osm_feature(key = 'highway') %>%
+  osmdata_sf()
+
+amsterdam_streets <- amsterdam_street_features$osm_lines
+
+```
+
+```{r}
+left_side <- 4.72
+right_side <- 5.01
+bottom_side <- 52.3
+top_side <- 52.4
+
+
+amsterdam_streets <- amsterdam_streets %>%
+  st_crop(c(xmin = left_side, xmax = right_side,
+          ymin = bottom_side, ymax = top_side))
+
+ggplot(amsterdam_streets) +
+  geom_sf(alpha = .8, size = .2) +
+  coord_sf(xlim = c(left_side, right_side),
+           ylim = c(bottom_side, top_side)) +
+  theme_map() +
+  theme(panel.background = element_rect(fill = "wheat", color = NA))
+
+ggsave("C:/Users/mwill/OneDrive - Harvard University/Personal Projects/WallArt/photos/amsterdam.jpeg")
+
+
+# boston done
+# paris done
+# amsterdam done
+# quebec
+# montreal done
+# st louis done
+# new york city
+
+
+```
+
+## Montreal
+```{r}
+montreal_street_features <- opq(bbox = 'Montreal QC Canada') %>%
+  add_osm_feature(key = 'highway') %>%
+  osmdata_sf()
+
+montreal_shape <- st_read("https://data.montreal.ca/dataset/b628f1da-9dc3-4bb1-9875-1470f891afb1/resource/92cb062a-11be-4222-9ea5-867e7e64c5ff/download/limites-terrestres.geojson")
+
+montreal_streets <- montreal_street_features$osm_lines %>%
+  st_filter(montreal_shape)
+
+
+```
+
+```{r}
+left_side <- -73.72
+right_side <- -73.51
+bottom_side <- 45.44
+top_side <- 45.58
+
+
+montreal_streets <- montreal_streets %>%
+  st_crop(c(xmin = left_side, xmax = right_side,
+          ymin = bottom_side, ymax = top_side))
+
+ggplot(montreal_streets) +
+  geom_sf(alpha = .8, size = .1) +
+  # coord_sf(xlim = c(left_side, right_side),
+  #          ylim = c(bottom_side, top_side)) +
+  theme_map() +
+  theme(panel.background = element_rect(fill = "wheat", color = NA))
+
+ggsave("C:/Users/mwill/OneDrive - Harvard University/Personal Projects/WallArt/photos/montreal.jpeg")
+
+```
+
+## St. Louis
+```{r}
+stl_street_features <- opq(bbox = 'St. Louis MO USA') %>%
+  add_osm_feature(key = 'highway') %>%
+  osmdata_sf()
+
+stl_streets <- stl_street_features$osm_lines 
+
+
+```
+
+```{r}
+left_side <- -90.32
+right_side <- -90.17
+bottom_side <- 38.57
+top_side <- 38.69
+
+
+stl_streets <- stl_streets %>%
+  st_crop(c(xmin = left_side, xmax = right_side,
+          ymin = bottom_side, ymax = top_side))
+
+ggplot(stl_streets) +
+  geom_sf(alpha = .8, size = .2) +
+  # coord_sf(xlim = c(left_side, right_side),
+  #          ylim = c(bottom_side, top_side)) +
+  theme_map() +
+  theme(panel.background = element_rect(fill = "wheat", color = NA))
+
+ggsave("C:/Users/mwill/OneDrive - Harvard University/Personal Projects/WallArt/photos/stlouis.jpeg")
+
+```
+## Boston
+
+```{r}
+
+ma_towns <- st_read(here("data", "ma_towns"), layer = "TOWNSSURVEY_POLYM") %>%
+  st_transform(crs = "WGS84")
+
+bos_shape <- ma_towns %>%
+  filter(TOWN %in% c("BOSTON","CAMBRIDGE", "BROOKLINE", "WATERTOWN", "SOMERVILLE",
+                     "CHELSEA", "EVERETT", "BELMONT", "MEDFORD"))
+
+boston_street_features <- opq(bbox = 'Boston MA USA') %>%
+  add_osm_feature(key = 'highway') %>%
+  osmdata_sf()
+
+boston_streets <- boston_street_features$osm_lines %>%
+  st_filter(bos_shape)
+
+```
+
+```{r}
+left_side <- -71.16
+right_side <- -71.02
+bottom_side <- 42.32
+top_side <- 42.40
+
+ggplot(boston_streets) +
+  geom_sf(alpha = .8, size = .2) +
+  coord_sf(xlim = c(left_side, right_side),
+           ylim = c(bottom_side, top_side)) +
+  theme_map() +
+  theme(panel.background = element_rect(fill = "wheat", color = NA))
+
+ggsave("C:/Users/mwill/OneDrive - Harvard University/Personal Projects/WallArt/photos/boston.jpeg")
+
+
+## Quebec
+
+quebec_proj <- "+proj=lcc +lat_1=60 +lat_2=46 +lat_0=44 +lon_0=-68.5 +x_0=0 +y_0=0 +ellps=clrk66 +units=m +no_defs"
+
+quebec_street_features <- opq(bbox = 'Quebec QC Canada') %>%
+  add_osm_feature(key = 'highway') %>%
+  osmdata_sf()
+
+quebec_streets <- quebec_street_features$osm_lines 
+
+
+
+left_side <- -71.3
+right_side <- -71.08
+bottom_side <- 46.75
+top_side <- 46.9
+
+
+quebec_streets <- quebec_streets %>%
+  st_crop(c(xmin = left_side, xmax = right_side,
+          ymin = bottom_side, ymax = top_side)) %>%
+  st_transform(quebec_proj)
+
+ggplot(quebec_streets) +
+  geom_sf(alpha = .8, size = .06) +
+  # coord_sf(crs = quebec_proj) +
+  theme_map() +
+  theme(panel.background = element_rect(fill = "wheat", color = NA))
+
+ggsave("C:/Users/mwill/OneDrive - Harvard University/Personal Projects/WallArt/photos/quebec.jpeg", height = 9, width = 9)
+
+
+
+
+## NYC
+
+nyc_street_features <- opq(bbox = 'Manhattan NY') %>%
+  add_osm_feature(key = 'highway') %>%
+  osmdata_sf()
+
+nyc_streets <- nyc_street_features$osm_lines 
+
+
+
+left_side <- -74.02
+right_side <- -73.9
+bottom_side <- 40.67
+top_side <- 40.80
+# 
+# 
+nyc_streets <- nyc_streets %>%
+  st_crop(c(xmin = left_side, xmax = right_side,
+          ymin = bottom_side, ymax = top_side))
+
+ggplot(nyc_streets) +
+  geom_sf(alpha = .8, size = .1) +
+  # coord_sf(xlim = c(left_side, right_side),
+  #          ylim = c(bottom_side, top_side)) +
+  theme_map() +
+  theme(panel.background = element_rect(fill = "wheat", color = NA))
+
+ggsave("C:/Users/mwill/OneDrive - Harvard University/Personal Projects/WallArt/photos/nyc.jpeg",
+       height = 9, width = 9)
+
+```
+
